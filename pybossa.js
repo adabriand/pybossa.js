@@ -219,4 +219,35 @@
         return url;
     }
 
+    pybossa.getCurrentUserId = function() {
+	var response = $.ajax({
+            url: url + 'api/app/get_current_user_id',
+            dataType: 'json',
+	    async: false,
+        }).responseText;
+	var response_json = $.parseJSON(response);
+        return response_json.current_user_id;
+    }
+
+    pybossa.authenticateUser = function(face_id) {
+        restParameters = {
+            'facebook_user_id': face_id,
+	    'email': "aaa@gmail.com",
+	    'name': "aaa"
+        };
+
+        restParameters = JSON.stringify(restParameters);
+
+        return $.ajax({
+            type: 'POST',
+            url: url + 'api/user/authenticate',
+	    data: restParameters,
+            contentType: 'application/json',
+            dataType: 'json'
+        })
+        .pipe( function( response ) {
+		console.log(response);
+        });
+    }
+
 } ( window.pybossa = window.pybossa || {}, jQuery ));
