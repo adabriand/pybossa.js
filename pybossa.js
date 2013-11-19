@@ -17,9 +17,9 @@
 
 (function( pybossa, $, undefined ) {
     var url = '/';
+    var user_facebook_id = "";
 
-
-    // Private methods
+   // Private methods
     function getApp(appname){
         return $.ajax({
             url: url + 'api/app',
@@ -31,9 +31,21 @@
         } );
     }
 
+    function addFbParameters(restParameters) {
+	if (user_facebook_id != "") {
+		var connector = restParameters.length == 0 ? "" : "&";
+		restParameters +=  connector + "facebook_user_id=" + user_facebook_id
+	}
+	return restParameters;
+    }
+
     function getTaskRun( app ) {
+	var restParameters = "";
+	restParameters = addFbParameters(restParameters);
+
         return $.ajax({
             url: url + 'api/app/' + app.id + '/newtask',
+	    data : restParameters,
             dataType: 'json'
         })
         .pipe( function( data ) {
@@ -62,6 +74,10 @@
             'info': data.answer
         };
 
+	if (user_facebook_id.length != 0) {
+		taskrun = $.extend(taskrun,
+			{'facebook_user_id' : user_facebook_id});
+	}
         taskrun = JSON.stringify(taskrun);
 
         return $.ajax({
@@ -235,7 +251,6 @@
 	    'email': "aaa@gmail.com",
 	    'name': "aaa"
         };
-
         restParameters = JSON.stringify(restParameters);
 
         return $.ajax({
@@ -248,6 +263,10 @@
         .pipe( function( response ) {
 		console.log(response);
         });
+    }
+
+    pybossa.initUserFacebookId = function(userId) {
+	user_facebook_id = userId;
     }
 
 } ( window.pybossa = window.pybossa || {}, jQuery ));
