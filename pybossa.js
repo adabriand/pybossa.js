@@ -19,6 +19,10 @@
 	var user_facebook_id = "";
 
 	// Private methods
+	function initUserFacebookId(userId) {
+		user_facebook_id = userId;
+	}
+
 	function getApp(appname) {
 		return $.ajax({
 			url : url + 'api/app',
@@ -253,13 +257,8 @@
 		return response_json.current_user_id;
 	}
 
-	pybossa.authenticateUser = function(face_id, callback) {
-		restParameters = {
-			'facebook_user_id' : face_id,
-			'email' : "memobrasil3@gmail.com",
-			'name' : "memobrasil3"
-		};
-		restParameters = JSON.stringify(restParameters);
+	pybossa.authenticateUser = function(authData, callback) {
+		restParameters = JSON.stringify(authData);
 
 		return $.ajax({
 			type : 'POST',
@@ -267,11 +266,10 @@
 			data : restParameters,
 			contentType : 'application/json',
 			dataType : 'json'
-		}).pipe(callback(response));
-	}
-
-	pybossa.initUserFacebookId = function(userId) {
-		user_facebook_id = userId;
+		}).pipe(function (response) {
+			initUserFacebookId(authData.facebook_user_id);
+			callback(response);
+		});
 	}
 
 }(window.pybossa = window.pybossa || {}, jQuery));
