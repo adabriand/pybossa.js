@@ -111,8 +111,12 @@
 	}
 
 	function userProgress(appname) {
+		var restParameters = "";
+		restParameters = addFbParameters(restParameters);
+		
 		return $.ajax({
 			url : url + 'api/app/' + appname + '/userprogress',
+			data: restParameters,
 			dataType : 'json',
 		});
 	}
@@ -247,19 +251,21 @@
 		return url;
 	}
 
-	pybossa.getCurrentUserId = function() {
+	pybossa.getCurrentUserId = function(callback) {
+		var restParameters = "";
+		restParameters = addFbParameters(restParameters);
+		
 		var response = $.ajax({
 			url : url + 'api/app/get_current_user_id',
-			dataType : 'json',
-			async : false,
-		}).responseText;
-		var response_json = $.parseJSON(response);
-		return response_json.current_user_id;
+			data : restParameters,
+			dataType : 'json'
+		}).pipe(function(response) {
+			callback(response.current_user_id);	
+		});
 	}
-
+	
 	pybossa.authenticateUser = function(authData, callback) {
 		restParameters = JSON.stringify(authData);
-
 		return $.ajax({
 			type : 'POST',
 			url : url + 'api/user/authenticate',
