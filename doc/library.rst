@@ -91,23 +91,23 @@ of the tasks into the HTML template, and take actions based on the users's answe
 
   * pybossa.authenticateUser(function(authData, callback));
   
-This method authenticate user on pybossa server, since that the user have accepted the app permissions and have
+This method authenticate user on PyBossa Server, since that the user have accepted the app permissions and have
 logged on facebook. The response received is a 'OK' on json format. When the user is authenticated, the 
-pybossa server store your facebook id, passed on authdata parameter. If the facebook id, of the user 
-identified by your email in pybossa database, is not null, it will be setted; else, it remains. The facebook
-id will identify the user on facebook and pybossa server.
+PyBossa Server store your Facebook id, passed on the authData parameter. If the Facebook id, of the user 
+identified by your email in PyBossa database, is null, it will be setted; else, its Facebook id remains. The Facebook
+id will identify the user on Facebook and PyBossa server.
 
-In authdata parameter are passed the permissions type, the email and user name too. If the user doesn't exists on
-pybossa database, one will be created with the name, fullname, email and facebook id passed.
+The authData parameter is compound by the permissions type, the email, user name and full name.
+If the user doesn't exists on PyBossa database, one will be created with the name, fullname, email and Facebook id passed.
   
 
 .. code-block:: javascript
 
-    pybossa.authenticateUser = function(authData, callback) {
+    pybossa.authenticateFbUser = function(authData, callback) {
 		restParameters = JSON.stringify(authData);
 		return $.ajax({
 			type : 'POST',
-			url : url + 'api/user/authenticate',
+			url : url + 'api/user/authenticate_fb_user',
 			data : restParameters,
 			contentType : 'application/json',
 			dataType : 'json'
@@ -115,7 +115,7 @@ pybossa database, one will be created with the name, fullname, email and faceboo
 			initUserFacebookId(authData.facebook_user_id);
 			callback(response);
 		});
-	};
+	}
 
 
 2. Loading the Task data
