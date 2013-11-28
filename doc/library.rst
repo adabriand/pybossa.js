@@ -9,7 +9,8 @@ Getting a task
 ==============
 
 In PyBossa every application is defined as a JSON object with several fields:
-.. code-block:: javascript
+
+.. code-block::javascript
 
     {
         "info": {
