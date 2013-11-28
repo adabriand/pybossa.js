@@ -98,7 +98,7 @@ identified by your email in pybossa database, is not null, it will be setted; el
 id will identify the user on facebook and pybossa server.
 
 In authdata parameter are passed the permissions type, the email and user name too. If the user doesn't exists on
-pybossa database, one will be created with the name, email and facebook id passed.
+pybossa database, one will be created with the name, fullname, email and facebook id passed.
   
 
 .. code-block:: javascript
