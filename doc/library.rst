@@ -89,7 +89,7 @@ of the tasks into the HTML template, and take actions based on the users's answe
 1. Authenticating User on Facebook
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  * pybossa.authenticateUser(function(authData, callback));
+  * pybossa.authenticateFacebookUser(function(authData, callback));
   
 This method authenticate user on PyBossa Server, since that the user have accepted the app permissions and have
 logged on facebook. The response received is a 'OK' on json format. When the user is authenticated, the 
@@ -103,11 +103,11 @@ If the user doesn't exists on PyBossa database, one will be created with the nam
 
 .. code-block:: javascript
 
-    pybossa.authenticateFbUser = function(authData, callback) {
+    pybossa.authenticateFacebookUser = function(authData, callback) {
 		restParameters = JSON.stringify(authData);
 		return $.ajax({
 			type : 'POST',
-			url : url + 'api/user/authenticate_fb_user',
+			url : url + 'api/user/authenticate_facebook_user',
 			data : restParameters,
 			contentType : 'application/json',
 			dataType : 'json'
