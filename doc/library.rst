@@ -97,7 +97,7 @@ PyBossa Server store your Facebook id, passed on the authData parameter. If the 
 identified by your email in PyBossa database, is null, it will be setted; else, its Facebook id remains. The Facebook
 id will identify the user on Facebook and PyBossa server.
 
-The authData parameter is compound by the permissions type, the email, user name and full name.
+The authData parameter is compound by the user's email, name and full name.
 If the user doesn't exists on PyBossa database, one will be created with the name, fullname, email and Facebook id passed.
   
 
