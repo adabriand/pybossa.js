@@ -91,14 +91,14 @@ of the tasks into the HTML template, and take actions based on the users's answe
 
   * pybossa.authenticateFacebookUser(function(authData, callback));
   
-This method authenticate user on PyBossa Server, since that the user have accepted the app permissions and have
-logged on facebook. The response received is a 'OK' on json format. When the user is authenticated, the 
+This method authenticates a user on PyBossa Server, since that the user have accepted the app permissions and have
+logged on Facebook. The response received is a 'OK' on json format. When the user is authenticated, the 
 PyBossa Server store your Facebook id, passed on the authData parameter. If the Facebook id, of the user 
-identified by your email in PyBossa database, is null, it will be setted; else, its Facebook id remains. The Facebook
+identified by his/her email in PyBossa database, is null, it will be setted; else, its Facebook id remains. The Facebook
 id will identify the user on Facebook and PyBossa server.
 
 The authData parameter is compound by the user's email, name and full name.
-If the user doesn't exists on PyBossa database, one will be created with the name, fullname, email and Facebook id passed.
+If a user with the email passed on authData parameter doesn't exist on PyBossa database, one will be created with the name, fullname, email and Facebook id from the authData parameter.
   
 
 .. code-block:: javascript
