@@ -85,8 +85,39 @@ of the tasks into the HTML template, and take actions based on the users's answe
   user_id. For anonymous users the submitted task will only have the user IP
   address.
 
+1. Authenticating User on Facebook
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Loading the Task data
+  * pybossa.authenticateFacebookUser(function(authData, callback));
+  
+This method authenticates a user on PyBossa Server, since that the user have accepted the app permissions and have
+logged on Facebook. The response received is a 'OK' on json format. When the user is authenticated, the 
+PyBossa Server store your Facebook id, passed on the authData parameter. If the Facebook id, of the user 
+identified by his/her email in PyBossa database, is null, it will be setted; else, its Facebook id remains. The Facebook
+id will identify the user on Facebook and PyBossa server.
+
+The authData parameter is compound by the user's email, name and full name.
+If a user with the email passed on authData parameter doesn't exist on PyBossa database, one will be created with the name, fullname, email and Facebook id from the authData parameter.
+  
+
+.. code-block:: javascript
+
+    pybossa.authenticateFacebookUser = function(authData, callback) {
+		restParameters = JSON.stringify(authData);
+		return $.ajax({
+			type : 'POST',
+			url : url + 'api/user/authenticate_facebook_user',
+			data : restParameters,
+			contentType : 'application/json',
+			dataType : 'json'
+		}).pipe(function (response) {
+			initUserFacebookId(authData.facebook_user_id);
+			callback(response);
+		});
+	}
+
+
+2. Loading the Task data
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Every PyBossa project will have DOM skeleton where you will load the task data.
