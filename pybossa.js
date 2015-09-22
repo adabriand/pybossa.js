@@ -14,100 +14,88 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/* Bug workaround for IE when debugging toolbar is not open */
-if (typeof(console) == 'undefined') {
-  console = {
-    log: function () {},
-    warn: function () {},
-    error: function () {}
-  };
-}
 
-(function( pybossa, $, undefined ) {
+(function(pybossa, $, undefined) {
     var url = '/';
-	var user_facebook_id = "";
+    var doneInit = 0;
 
-    // Private methods
-	function initUserFacebookId(userId) {
-		user_facebook_id = userId;
-	}
-
-    function getApp(appname){
+    var template = '<div class="modal fade in" id="modal2" tabindex="-1" role="dialog" aria-labelledby="Acertou Mizeravi" aria-hidden="true" style="display: block; padding-right: 15px;"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">×</span></button><h4 class="modal-title" id="myModalLabel">Acertou Mizeravi</h4></div><div class="modal-body" style="overflow: auto;"><div id="m0" class="modal-body" style=""><p>Completou a tarefa</p></div></div><div class="modal-footer"><button type="button" class="btn btn-primary" data-dismiss="modal">Tente!</button></div></div></div></div>';
+    //AJAX calls
+    function _userProgress(projectname) {
         return $.ajax({
-            url: url + 'api/app',
-            data: 'short_name='+appname,
+            url: url + 'api/project/' + projectname + '/userprogress',
+            cache: false,
+            dataType: 'json'
+        });
+    }
+
+    function _fetchProject(projectname) {
+        return $.ajax({
+            url: url + 'api/project',
+            data: 'short_name='+projectname,
             dataType:'json'
-        })
-        .pipe( function( data ) {
-            return data[0];
-        } );
-    }
-
-	function addFacebookParameters(restParameters) {
-		if (user_facebook_id != "") {
-			var connector = restParameters.length == 0 ? "" : "&";
-			restParameters += connector + "facebook_user_id="
-					+ user_facebook_id
-		}
-		return restParameters;
-	}
-
-    function getTaskRun( app ) {
-		var restParameters = "";
-		restParameters = addFacebookParameters(restParameters);
-
-        return $.ajax({
-            url: url + 'api/app/' + app.id + '/newtask',
-			data : restParameters,
-            dataType: 'json'
-        })
-        .pipe( function( data ) {
-            taskrun = { question: app.description, task: data};
-            return taskrun;
         });
     }
 
-    function getTask( taskid, answer ) {
+    function _fetchNewTask(projectId, offset) {
+        offset = offset || 0;
         return $.ajax({
-            url: url + 'api/task/' + taskid,
+            url: url + 'api/project/' + projectId + '/newtask',
+            data: 'offset=' + offset,
+            cache: false,
             dataType: 'json'
-        })
-        .pipe( function( data ) {
-            tmp = data;
-            tmp.answer = answer;
-            return tmp;
+        });
+    }
+    function _fetchTask(taskId) {
+        return $.ajax({
+            url: url + 'api/task/' + taskId,
+            cache: false,
+            dataType: 'json'
         });
     }
 
-    function createTaskRun( data ) {
-        taskrun = {};
-        taskrun = {
-            'app_id': data.app_id,
-            'task_id': data.id,
-            'info': data.answer
-        };
-
-		if (user_facebook_id.length != 0) {
-			taskrun = $.extend(taskrun, {
-				'facebook_user_id' : user_facebook_id
-			});
-		}
-
-        taskrun = JSON.stringify(taskrun);
-
+    function _saveTaskRun(taskrun) {
         return $.ajax({
             type: 'POST',
             url: url + 'api/taskrun',
             dataType: 'json',
             contentType: 'application/json',
             data: taskrun
-        })
-        .pipe( function( data ) {
-            return data;
         });
     }
 
-    function getCurrentTaskId(url) {
+    // Private methods
+    function _getProject(projectname){
+        return _fetchProject(projectname)
+        .then(function(data) {return data[0];});
+    }
+
+    function _getNewTask(project) {
+        return _fetchNewTask(project.id)
+        .then(_addProjectDescription.bind(undefined, project));
+    }
+
+    function _addProjectDescription(project, task) {
+        return { question: project.description, task: task};
+        }
+
+    function _addAnswerToTask(task, answer) {
+        task.answer = answer;
+        return task;
+    }
+
+    function _createTaskRun(answer, task) {
+        task = _addAnswerToTask(task, answer);
+        var taskrun = {
+            'project_id': task.project_id,
+            'task_id': task.id,
+            'info': task.answer
+        };
+        taskrun = JSON.stringify(taskrun);
+        return _saveTaskRun(taskrun).then(function(data) {return data;});
+    }
+
+    function _getCurrentTaskId(url) {
         pathArray = url.split('/');
         if (url.indexOf('/task/')!=-1) {
             var l = pathArray.length;
@@ -121,163 +109,132 @@ if (typeof(console) == 'undefined') {
         return false;
     }
 
-    function userProgress( appname ) {
-		var restParameters = "";
-		restParameters = addFacebookParameters(restParameters);
-        return $.ajax({
-            url: url + 'api/app/' + appname + '/userprogress',
-			data: restParameters,
-            dataType: 'json'
+    function _getJogo(projectname, tasks){
+        _userProgress(projectname).done(function(data){
+            console.log("init:"+doneInit); 
+            doneInit += 1;    
+            if (doneInit == tasks){
+                $("#modal").append(template);
+                doneInit = 0;
+            }
         });
     }
 
     // fallback for user defined action
-    function __taskLoaded (task, deferred) {
+    var _taskLoaded = function(task, deferred) {
         deferred.resolve(task);
+    };
+
+    var _presentTask = function(task, deferred) {
+        deferred.resolve(task);
+    };
+
+    function _setUserTaskLoaded (userFunc) {
+        _taskLoaded = userFunc;
     }
 
-    function taskLoaded (userFunc) {
-
-        this.__taskLoaded = userFunc;
+    function _setUserPresentTask (userFunc) {
+        _presentTask = userFunc;
     }
 
-    function presentTask (userFunc) {
-        this.__presentTask = userFunc;
+    function _resolveNextTaskLoaded(task, deferred) {
+        var udef = $.Deferred();
+        _taskLoaded(task, udef);
+        udef.done(function(task) {
+            deferred.resolve(task);
+        });
     }
 
-    function run ( appname ) {
-        var me = this;
-        $.ajax({
-            url: url + 'api/app',
-            data: 'short_name=' + appname,
-            dataType:'json'
-        }).done(function(app) {
-            app = app[0];
-            function getTask(offset) {
+    function _run (projectname, _window) {
+        _window = _window || window;
+        _fetchProject(projectname).done(function(project) {
+            project = project[0];
+            function getNextTask(offset, previousTask) {
                 offset = offset || 0;
                 var def = $.Deferred();
-                var xhr = $.ajax({
-                    url: url + 'api/app/' + app.id + '/newtask',
-                    data: 'offset=' + offset,
-                    dataType: 'json'
-                });
-                if (window.history.length <= 1) {
-                    var taskId = getCurrentTaskId(window.location.pathname);
-                    if (taskId) {
-                        param =  'api/task/' + taskId;
-                        var xhr = $.ajax({
-                            url: url + 'api/task/' + taskId,
-                            dataType: 'json'
-                        })
-                    }
-                }
+                var taskId = _getCurrentTaskId(_window.location.pathname);
+                var xhr = (taskId && (previousTask === undefined)) ? _fetchTask(taskId) : _fetchNewTask(project.id, offset);
                 xhr.done(function(task) {
-                    var udef = $.Deferred();
-                    me.__taskLoaded(task, udef);
-                    udef.done(function(task) {
-                        def.resolve(task);
-                    });
+                    if (previousTask && task.id === previousTask.id) {
+                        var secondTry = _fetchNewTask(project.id, offset+1)
+                        .done(function(secondTask){
+                            _resolveNextTaskLoaded(secondTask, def);
+                        });
+                    }
+                    else {
+                        _resolveNextTaskLoaded(task, def);
+                    }
                 });
                 return def.promise();
             }
 
-            function loop(task, answer) {
-                var nextLoaded = getTask(1),
-                taskSolved = $.Deferred();
+            function loop(task) {
+                var nextLoaded = getNextTask(1, task),
+                taskSolved = $.Deferred(),
+                nextUrl;
                 if (task.id) {
-                    // note if working with pybossa.js locally and opening the
-                    // html page with a file:/// urls the call to
-                    // history.pushState will result in a (silent) security
-                    // exception (in chrome at least) - wrap in try/except to
-                    // avoid this
-                    try {
-                        if (url != '/') {
-                            var nextUrl = url + '/app/' + appname + '/task/' + task.id;
-                        }
-                        else {
-                            var nextUrl = '/app/' + appname + '/task/' + task.id;
-                        }
-                        history.pushState ({}, "Title", nextUrl);
-                    } catch(e) {
-                        console.log(e);
+                    if (url != '/') {
+                        nextUrl = url + '/project/' + projectname + '/task/' + task.id;
                     }
+                    else {
+                        nextUrl = '/project/' + projectname + '/task/' + task.id;
+                    }
+                    history.pushState({}, "Title", nextUrl);
                 }
-                me.__presentTask(task, taskSolved);
+                _presentTask(task, taskSolved);
                 $.when(nextLoaded, taskSolved).done(loop);
             }
-            getTask().done(loop);
+            getNextTask(0, undefined).done(loop);
         });
     }
 
 
     // Public methods
-    pybossa.newTask = function ( appname ) {
-        return getApp(appname).pipe(getTaskRun);
+    pybossa.newTask = function (projectname) {
+        pybossa.getJogo(projectname);
+        return _getProject(projectname).then(_getNewTask);
     };
 
-    pybossa.saveTask = function ( taskid, answer ) {
-        return getTask( taskid, answer ).pipe(createTaskRun);
+    pybossa.saveTask = function (taskId, answer) {
+        return _fetchTask(taskId).then(_createTaskRun.bind(undefined, answer));
     };
 
-    pybossa.getCurrentTaskId = function ( url ) {
+    pybossa.getCurrentTaskId = function (url) {
         if (url !== undefined) {
-            return getCurrentTaskId(url);
+            return _getCurrentTaskId(url);
         }
         else {
-            return getCurrentTaskId(window.location.pathname);
+            return _getCurrentTaskId(window.location.pathname);
         }
     };
 
-    pybossa.userProgress = function ( appname ) {
-        return userProgress( appname );
+    pybossa.userProgress = function (projectname) {
+        return _userProgress( projectname );
     };
 
-    pybossa.run = function ( appname ) {
-        return run( appname );
-    }
+    pybossa.run = function (projectname, _window) {
+        return _run(projectname, _window);
+    };
 
-    pybossa.taskLoaded = function ( userFunc ) {
-        return taskLoaded( userFunc );
-    }
+    pybossa.taskLoaded = function (userFunc) {
+        return _setUserTaskLoaded( userFunc );
+    };
 
-    pybossa.presentTask = function ( userFunc ) {
-        return presentTask( userFunc );
-    }
+    pybossa.presentTask = function (userFunc) {
+        return _setUserPresentTask( userFunc );
+    };
 
-    pybossa.setEndpoint = function ( endpoint ) {
+    pybossa.setEndpoint = function (endpoint) {
         // Check that the URL has the trailing slash, otherwise add it
         if ( endpoint.charAt(endpoint.length-1) != '/' ) {
             endpoint += '/';
         }
         url = endpoint;
         return url;
-    }
+    };
 
-	pybossa.getCurrentUserId = function(callback) {
-		var restParameters = "";
-		restParameters = addFacebookParameters(restParameters);
-		
-		var response = $.ajax({
-			url : url + 'api/app/get_current_user_id',
-			data : restParameters,
-			dataType : 'json'
-		}).pipe(function(response) {
-			callback(response.current_user_id);	
-		});
-	}
-	
-	pybossa.authenticateFacebookUser = function(authData, callback) {
-		restParameters = JSON.stringify(authData);
-		return $.ajax({
-			type : 'POST',
-			url : url + 'api/user/authenticate_facebook_user',
-			data : restParameters,
-			contentType : 'application/json',
-			dataType : 'json'
-		}).pipe(function (response) {
-			initUserFacebookId(authData.facebook_user_id);
-			callback(response);
-		});
-	}
+    pybossa.getJogo = function (projectname, tasks){
+        return _getJogo( projectname, tasks);
+    };
 
-} ( window.pybossa = window.pybossa || {}, jQuery ));
+} (window.pybossa = window.pybossa || {}, jQuery));
