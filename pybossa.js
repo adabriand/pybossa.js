@@ -18,6 +18,9 @@
 
 (function(pybossa, $, undefined) {
     var url = '/';
+    var doneInit = 0;
+
+    var template = '<div class="modal fade in" id="modal2" tabindex="-1" role="dialog" aria-labelledby="Acertou Mizeravi" aria-hidden="true" style="display: block; padding-right: 15px;"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">×</span></button><h4 class="modal-title" id="myModalLabel">Acertou Mizeravi</h4></div><div class="modal-body" style="overflow: auto;"><div id="m0" class="modal-body" style=""><p>Completou a tarefa</p></div></div><div class="modal-footer"><button type="button" class="btn btn-primary" data-dismiss="modal">Tente!</button></div></div></div></div>';
 
     //AJAX calls
     function _userProgress(projectname) {
@@ -108,6 +111,19 @@
         return false;
     }
 
+
+    function _getJogo(projectname, tasks){
+        _userProgress(projectname).done(function(data){
+            console.log("init:"+doneInit);    
+            if (doneInit == tasks){
+                $("#modal").append(template);
+                doneInit = 0;
+            }
+            doneInit += 1; 
+        });
+    }
+
+
     // fallback for user defined action
     var _taskLoaded = function(task, deferred) {
         deferred.resolve(task);
@@ -179,6 +195,7 @@
 
     // Public methods
     pybossa.newTask = function (projectname) {
+        pybossa.getJogo(projectname);
         return _getProject(projectname).then(_getNewTask);
     };
 
@@ -218,6 +235,11 @@
         }
         url = endpoint;
         return url;
+    };
+
+
+    pybossa.getJogo = function (projectname, tasks){
+        return _getJogo( projectname, tasks);
     };
 
 } (window.pybossa = window.pybossa || {}, jQuery));
