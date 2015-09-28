@@ -20,7 +20,7 @@
     var url = '/';
     var doneInit = 0;
 
-    var template = '<div class="modal fade in" id="modal2" tabindex="-1" role="dialog" aria-labelledby="Acertou Mizeravi" aria-hidden="true" style="display: block; padding-right: 15px;"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">×</span></button><h4 class="modal-title" id="myModalLabel">Acertou Mizeravi</h4></div><div class="modal-body" style="overflow: auto;"><div id="m0" class="modal-body" style=""><p>Completou a tarefa</p></div></div><div class="modal-footer"><button type="button" class="btn btn-primary" data-dismiss="modal">Tente!</button></div></div></div></div>';
+    var template = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="myModalLabel">Parabéns</h4></div><div class="modal-body">Você completou XXX tarefas</div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button></div></div></div></div>';
 
     //AJAX calls
     function _userProgress(projectname) {
@@ -116,10 +116,14 @@
         _userProgress(projectname).done(function(data){
             console.log("init:"+doneInit);    
             if (doneInit == tasks){
-                $("#modal").append(template);
+                $("#modal").append(template.replace("XXX", tasks));
+                $('#myModal').modal('show');
                 doneInit = 0;
             }
             doneInit += 1; 
+        });
+        $( "#startContrib2" ).click(function() {
+          alert( "Handler for .click() called." );
         });
     }
 
