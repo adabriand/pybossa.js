@@ -18,7 +18,8 @@
 
 (function(pybossa, $, undefined) {
     var url = '/';
-    var doneInit = 0;
+    var taskNumber = 0;
+    var arrayFuncoes =[];
 
     var template = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="myModalLabel">Parabéns</h4></div><div class="modal-body">Você completou XXX tarefas</div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button></div></div></div></div>';
 
@@ -111,22 +112,22 @@
         return false;
     }
 
+    //funcoes personalizadas
 
-    function _getJogo(projectname, tasks){
-        _userProgress(projectname).done(function(data){
-            console.log("init:"+doneInit);    
-            if (doneInit == tasks){
-                $("#modal").append(template.replace("XXX", tasks));
-                $('#myModal').modal('show');
-                doneInit = 0;
-            }
-            doneInit += 1; 
-        });
-        $( "#startContrib2" ).click(function() {
-          alert( "Handler for .click() called." );
+    function _getModal(){
+        _userProgress('modal').done(function(data){
+            $("#modal").append(template.replace("XXX", "ely"));
+            $('#myModal').modal('show');
         });
     }
 
+    function execute(funcao){
+        funcao();
+    };
+
+    function _addFunction(task, funcao){
+        arrayFuncoes.push([task,funcao]);
+    }
 
     // fallback for user defined action
     var _taskLoaded = function(task, deferred) {
@@ -177,6 +178,15 @@
             }
 
             function loop(task) {
+                for (i in arrayFuncoes){
+                   if(arrayFuncoes[i][0] === taskNumber){
+                        console.log(arrayFuncoes[i][1]);
+                        execute(arrayFuncoes[i][1]);
+                   }
+                }
+                if (arrayFuncoes.indexOf(taskNumber) != -1){
+                    console.log("task: "+taskNumber);    
+                }
                 var nextLoaded = getNextTask(1, task),
                 taskSolved = $.Deferred(),
                 nextUrl;
@@ -191,6 +201,7 @@
                 }
                 _presentTask(task, taskSolved);
                 $.when(nextLoaded, taskSolved).done(loop);
+                taskNumber++;
             }
             getNextTask(0, undefined).done(loop);
         });
@@ -199,7 +210,6 @@
 
     // Public methods
     pybossa.newTask = function (projectname) {
-        pybossa.getJogo(projectname);
         return _getProject(projectname).then(_getNewTask);
     };
 
@@ -242,8 +252,12 @@
     };
 
 
-    pybossa.getJogo = function (projectname, tasks){
-        return _getJogo( projectname, tasks);
+    pybossa.getModal = function (){
+        return _getModal();
     };
+
+    pybossa.addFunction = function (task, funcao){
+        return _addFunction (task, funcao);
+    }
 
 } (window.pybossa = window.pybossa || {}, jQuery));
