@@ -21,7 +21,7 @@
     var taskNumber = 0;
     var arrayFuncoes =[];
 
-    var template = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="myModalLabel">Parabéns</h4></div><div class="modal-body">Você completou XXX tarefas</div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button></div></div></div></div>';
+    var template = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="myModalLabel">Parabéns</h4></div><div class="modal-body">texto</div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button></div></div></div></div>';
 
     //AJAX calls
     function _userProgress(projectname) {
@@ -114,19 +114,19 @@
 
     //funcoes personalizadas
 
-    function _getModal(){
+    function _getModal(texto){
         _userProgress('modal').done(function(data){
-            $("#modal").append(template.replace("XXX", "ely"));
+            $("#modal").append(template.replace("texto", texto));
             $('#myModal').modal('show');
         });
     }
 
-    function execute(funcao){
-        funcao();
+    function execute(funcao, atributos){
+        funcao(atributos);
     };
 
-    function _addFunction(task, funcao){
-        arrayFuncoes.push([task,funcao]);
+    function _addFunction(task, funcao, atributos){
+        arrayFuncoes.push([task,funcao, atributos]);
     }
 
     // fallback for user defined action
@@ -181,12 +181,10 @@
                 for (i in arrayFuncoes){
                    if(arrayFuncoes[i][0] === taskNumber){
                         console.log(arrayFuncoes[i][1]);
-                        execute(arrayFuncoes[i][1]);
+                        execute(arrayFuncoes[i][1],arrayFuncoes[i][2]);
                    }
                 }
-                if (arrayFuncoes.indexOf(taskNumber) != -1){
-                    console.log("task: "+taskNumber);    
-                }
+                
                 var nextLoaded = getNextTask(1, task),
                 taskSolved = $.Deferred(),
                 nextUrl;
@@ -252,12 +250,12 @@
     };
 
 
-    pybossa.getModal = function (){
-        return _getModal();
+    pybossa.getModal = function (texto){
+        return _getModal(texto);
     };
 
-    pybossa.addFunction = function (task, funcao){
-        return _addFunction (task, funcao);
+    pybossa.addFunction = function (task, funcao, atributos){
+        return _addFunction (task, funcao, atributos);
     }
 
 } (window.pybossa = window.pybossa || {}, jQuery));
