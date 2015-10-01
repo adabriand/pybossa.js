@@ -19,9 +19,9 @@
 (function(pybossa, $, undefined) {
     var url = '/';
     var taskNumber = 0;
-    var arrayFuncoes =[];
+    var arrayEventos =[];
 
-    var template = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="myModalLabel">Parabéns</h4></div><div class="modal-body">texto</div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button></div></div></div></div>';
+    var template = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="myModalLabel">heading</h4></div><div class="modal-body">texto</div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button></div></div></div></div>';
 
     //AJAX calls
     function _userProgress(projectname) {
@@ -114,19 +114,19 @@
 
     //funcoes personalizadas
 
-    function _getModal(texto){
-        _userProgress('modal').done(function(data){
-            $("#modal").append(template.replace("texto", texto));
-            $('#myModal').modal('show');
-        });
+    function _getModal(header, text){
+        console.log(header+" "+text);
+        //$("#modal").append(template.replace("heading", header));
+        $("#modal").append(template.replace(/texto/g, text).replace(/heading/g, header));
+        $('#myModal').modal('show');
     }
 
-    function execute(funcao, atributos){
-        funcao(atributos);
+    function execute(funcao, param1, param2){
+        funcao(param1, param2);
     };
 
-    function _addFunction(task, funcao, atributos){
-        arrayFuncoes.push([task,funcao, atributos]);
+    function _addEvento(task, funcao, param1, param2){
+        arrayEventos.push([task,funcao, param1, param2]);
     }
 
     // fallback for user defined action
@@ -178,10 +178,9 @@
             }
 
             function loop(task) {
-                for (i in arrayFuncoes){
-                   if(arrayFuncoes[i][0] === taskNumber){
-                        console.log(arrayFuncoes[i][1]);
-                        execute(arrayFuncoes[i][1],arrayFuncoes[i][2]);
+                for (i in arrayEventos){
+                   if(arrayEventos[i][0] === taskNumber){
+                       execute(arrayEventos[i][1],arrayEventos[i][2],arrayEventos[i][3]);
                    }
                 }
                 
@@ -250,12 +249,12 @@
     };
 
 
-    pybossa.getModal = function (texto){
-        return _getModal(texto);
+    pybossa.getModal = function (header, text){
+        return _getModal(header, text);
     };
 
-    pybossa.addFunction = function (task, funcao, atributos){
-        return _addFunction (task, funcao, atributos);
+    pybossa.addEvento = function (task, funcao, param1, param2){
+        return _addEvento (task, funcao, param1, param2);
     }
 
 } (window.pybossa = window.pybossa || {}, jQuery));
