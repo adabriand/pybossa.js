@@ -21,7 +21,7 @@
     var taskNumber = 0;
     var arrayEventos =[];
 
-    var template = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="myModalLabel">heading</h4></div><div class="modal-body">texto</div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button></div></div></div></div>';
+    var template = '<div class="modal fade" id="modalEventos" tabindex="-1" role="dialog" aria-labelledby="modalEventosLabel"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="modalEventosLabel">heading</h4></div><div class="modal-body">texto</div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button></div></div></div></div>';
 
     //AJAX calls
     function _userProgress(projectname) {
@@ -117,8 +117,8 @@
     function _getModal(header, text){
         console.log(header+" "+text);
         //$("#modal").append(template.replace("heading", header));
-        $("#modal").append(template.replace(/texto/g, text).replace(/heading/g, header));
-        $('#myModal').modal('show');
+        $("#modalApp").append(template.replace(/texto/g, text).replace(/heading/g, header));
+        $('#modalEventos').modal('show');
     }
 
     function execute(funcao, param1, param2){
